@@ -1,4 +1,4 @@
-module wolffshots/phocus_messages
+module github.com/wolffshots/phocus_messages
 
 go 1.19
 
