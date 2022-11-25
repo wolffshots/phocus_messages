@@ -1,15 +1,15 @@
-package messages
+package phocus_messages
 
 import (
-    "encoding/json" // encoding to json for mqtt
-	"errors" // creating custom err messages
-	"fmt" // string formatting
-	"log" // logging to std out
-	"strings" // string manipulation
-    "time" // sleeping
-    "wolffshots/phocus/crc"      // checksum calculations
-    "wolffshots/phocus/mqtt"     // comms with mqtt broker
-    "wolffshots/phocus/serial"   // comms with inverter
+	"encoding/json"                       // encoding to json for mqtt
+	"errors"                              // creating custom err messages
+	"fmt"                                 // string formatting
+	"github.com/wolffshots/phocus_crc"    // checksum calculations
+	"github.com/wolffshots/phocus_mqtt"   // comms with mqtt broker
+	"github.com/wolffshots/phocus_serial" // comms with inverter
+	"log"                                 // logging to std out
+	"strings"                             // string manipulation
+	"time"                                // sleeping
 )
 
 type OperationMode string
@@ -203,41 +203,41 @@ func NewQPGSnResponse(input string) (*QPGSnResponse, error) {
 // reads the response, deserialises it into a response
 // object and sends it to MQTT
 func HandleQPGS(inverterNum int) error {
-    query := fmt.Sprintf("QPGS%d", inverterNum)
-    log.Println(query)
-    bytes, err := serial.Write(query)
-    log.Printf("Sent %v bytes\n", bytes)
-    if err != nil {
-        log.Printf("Failed to write to serial with :%v\n", err)
-        return err
-    }
-    response, err := serial.Read(2 * time.Second)
-    if err != nil || response == "" {
-        log.Printf("Failed to read from serial with :%v\n", err)
-        return err
-    }
-    valid, err := crc.Verify(response)
-    if err != nil {
-        log.Fatalf("Verification of response from inverter produced an error :%v\n", err)
-        return err
-    }
-    if valid {
-        QPGSResponse, err := NewQPGSnResponse(response)
-        if err != nil || QPGSResponse == nil {
-            log.Fatalf("Failed to create response with :%v", err)
-        }
-        jsonQPGSResponse, err := json.Marshal(QPGSResponse)
-        if err != nil {
-            log.Fatalf("Failed to parse response to json with :%v", err)
-        }
-        err = mqtt.Send(fmt.Sprintf("phocus/stats/qpgs%d", inverterNum), 0, false, string(jsonQPGSResponse), 10)
-        if err != nil {
-            log.Fatalf("MQTT send of %s failed with: %v\ntype of thing sent was: %T", query, err, jsonQPGSResponse)
-        }
-        log.Printf("Sent to MQTT:\n%s\n", jsonQPGSResponse)
-    } else {
-        log.Println("Invalid response from QPGSn")
-        err = errors.New("invalid response from QPGSn")
-    }
-    return err
+	query := fmt.Sprintf("QPGS%d", inverterNum)
+	log.Println(query)
+	bytes, err := phocus_serial.Write(query)
+	log.Printf("Sent %v bytes\n", bytes)
+	if err != nil {
+		log.Printf("Failed to write to serial with :%v\n", err)
+		return err
+	}
+	response, err := phocus_serial.Read(2 * time.Second)
+	if err != nil || response == "" {
+		log.Printf("Failed to read from serial with :%v\n", err)
+		return err
+	}
+	valid, err := phocus_crc.Verify(response)
+	if err != nil {
+		log.Fatalf("Verification of response from inverter produced an error :%v\n", err)
+		return err
+	}
+	if valid {
+		QPGSResponse, err := NewQPGSnResponse(response)
+		if err != nil || QPGSResponse == nil {
+			log.Fatalf("Failed to create response with :%v", err)
+		}
+		jsonQPGSResponse, err := json.Marshal(QPGSResponse)
+		if err != nil {
+			log.Fatalf("Failed to parse response to json with :%v", err)
+		}
+		err = phocus_mqtt.Send(fmt.Sprintf("phocus/stats/qpgs%d", inverterNum), 0, false, string(jsonQPGSResponse), 10)
+		if err != nil {
+			log.Fatalf("MQTT send of %s failed with: %v\ntype of thing sent was: %T", query, err, jsonQPGSResponse)
+		}
+		log.Printf("Sent to MQTT:\n%s\n", jsonQPGSResponse)
+	} else {
+		log.Println("Invalid response from QPGSn")
+		err = errors.New("invalid response from QPGSn")
+	}
+	return err
 }

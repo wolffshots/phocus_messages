@@ -1,4 +1,4 @@
-package messages
+package phocus_messages
 
 import (
 	"errors"
