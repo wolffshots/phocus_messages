@@ -20,17 +20,20 @@ type Message struct {
 func Interpret(input Message) error {
 	switch input.Command {
 	case "QPGSn":
-		err := HandleQPGS(1)
-		if err != nil {
-			log.Printf("Failed to handle QPGS1 :%v\n", err)
-			return err
+		// TODO pass in inverter number
+		errOne := HandleQPGS(1)
+		if errOne != nil {
+			log.Printf("Failed to handle QPGS1 :%v\n", errOne)
 		}
-		err = HandleQPGS(2)
-		if err != nil {
-			log.Printf("Failed to handle QPGS2 :%v\n", err)
-			return err
+		errTwo := HandleQPGS(2)
+		if errTwo != nil {
+			log.Printf("Failed to handle QPGS2 :%v\n", errTwo)
 		}
-		return err
+		if errOne != nil {
+			return errOne
+		} else {
+			return errTwo
+		}
 	case "QID":
 		log.Println("TODO send QID")
 	default:
@@ -39,6 +42,7 @@ func Interpret(input Message) error {
 	return nil
 }
 
+// Command interface is a WIP
 type Command interface {
 	New()
 	Print()

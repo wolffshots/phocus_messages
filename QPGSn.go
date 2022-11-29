@@ -208,17 +208,17 @@ func HandleQPGS(inverterNum int) error {
 	bytes, err := phocus_serial.Write(query)
 	log.Printf("Sent %v bytes\n", bytes)
 	if err != nil {
-		log.Printf("Failed to write to serial with :%v\n", err)
+		log.Printf("Failed to write to serial with: %v\n", err)
 		return err
 	}
 	response, err := phocus_serial.Read(2 * time.Second)
 	if err != nil || response == "" {
-		log.Printf("Failed to read from serial with :%v\n", err)
+		log.Printf("Failed to read from serial with: %v\n", err)
 		return err
 	}
 	valid, err := phocus_crc.Verify(response)
 	if err != nil {
-		log.Fatalf("Verification of response from inverter produced an error :%v\n", err)
+		log.Fatalf("Verification of response from inverter %d produced an error: %v\n", inverterNum, err)
 		return err
 	}
 	if valid {
@@ -236,8 +236,12 @@ func HandleQPGS(inverterNum int) error {
 		}
 		log.Printf("Sent to MQTT:\n%s\n", jsonQPGSResponse)
 	} else {
-		log.Println("Invalid response from QPGSn")
-		err = errors.New("invalid response from QPGSn")
+		actual := response[len(response)-3 : len(response)-1]
+		remainder := response[:len(response)-3]
+		wanted, _ := phocus_crc.Checksum(remainder)
+		message := fmt.Sprintf("invalid response from QPGS%d: CRC should have been %s but was %s", inverterNum, string([]byte{byte((wanted >> 8) & 0xff), byte(wanted & 0xff)}), actual)
+		log.Println(message)
+		err = errors.New(message)
 	}
 	return err
 }
