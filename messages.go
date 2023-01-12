@@ -15,31 +15,39 @@ type Message struct {
 	Payload string    `json:"payload"`
 }
 
+var consecutiveErrors = 0
+
 // Interpret converts the generic `phocus` message into a specific inverter message
 // TODO add even more generalisation and separated implementation details here
-func Interpret(input Message) error {
+func Interpret(input Message) (error, int) {
 	switch input.Command {
 	case "QPGSn":
 		// TODO pass in inverter number
 		errOne := HandleQPGS(1)
 		if errOne != nil {
 			log.Printf("Failed to handle QPGS1 :%v\n", errOne)
-		}
+            consecutiveErrors++
+        }else{
+            consecutiveErrors = 0
+        }
 		errTwo := HandleQPGS(2)
 		if errTwo != nil {
 			log.Printf("Failed to handle QPGS2 :%v\n", errTwo)
-		}
+            consecutiveErrors++
+		}else{
+            consecutiveErrors = 0
+        }
 		if errOne != nil {
-			return errOne
+			return errOne, consecutiveErrors
 		} else {
-			return errTwo
+            return errTwo, consecutiveErrors
 		}
 	case "QID":
 		log.Println("TODO send QID")
 	default:
 		log.Println("Unexpected message on queue")
 	}
-	return nil
+	return nil, 0
 }
 
 // Command interface is a WIP
