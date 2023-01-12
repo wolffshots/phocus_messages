@@ -26,21 +26,21 @@ func Interpret(input Message) (error, int) {
 		errOne := HandleQPGS(1)
 		if errOne != nil {
 			log.Printf("Failed to handle QPGS1 :%v\n", errOne)
-            consecutiveErrors++
-        }else{
-            consecutiveErrors = 0
-        }
+			consecutiveErrors++
+		} else {
+			consecutiveErrors = 0
+		}
 		errTwo := HandleQPGS(2)
 		if errTwo != nil {
 			log.Printf("Failed to handle QPGS2 :%v\n", errTwo)
-            consecutiveErrors++
-		}else{
-            consecutiveErrors = 0
-        }
+			consecutiveErrors++
+		} else {
+			consecutiveErrors = 0
+		}
 		if errOne != nil {
 			return errOne, consecutiveErrors
 		} else {
-            return errTwo, consecutiveErrors
+			return errTwo, consecutiveErrors
 		}
 	case "QID":
 		log.Println("TODO send QID")
