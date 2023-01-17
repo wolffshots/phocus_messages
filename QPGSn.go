@@ -85,7 +85,7 @@ type Reserved string
 type InverterStatus struct {
 	MPPT          Status
 	ACCharging    Status
-    SolarCharging Status
+	SolarCharging Status
 	BatteryStatus BatteryStatus // 2 bits
 	ACInput       GridAvailability
 	ACOutput      Status
@@ -149,7 +149,9 @@ func NewQPGSnResponse(input string) (*QPGSnResponse, error) {
 	}
 	buffer := strings.Split(input[:len(input)-3], " ")
 	buffer[0] = strings.Trim(buffer[0], "(") // strip start byte
-	log.Printf("%v\n", buffer)
+	checksum := input[len(input)-3 : len(input)-1]
+	log.Printf("Buffer: %v\n", buffer)
+	log.Printf("Checksum: %x\n", checksum)
 	wantedLength := 27
 	if len(buffer) != wantedLength {
 		return nil, errors.New(fmt.Sprintf("input for QPGSnResponse was %v but should have been %v", len(buffer), wantedLength))
@@ -183,7 +185,7 @@ func NewQPGSnResponse(input string) (*QPGSnResponse, error) {
 		InverterStatus: InverterStatus{
 			MPPT:          Statuses[inverterStatusBuffer[0]],
 			ACCharging:    Statuses[inverterStatusBuffer[1]],
-            SolarCharging: Statuses[inverterStatusBuffer[2]],
+			SolarCharging: Statuses[inverterStatusBuffer[2]],
 			BatteryStatus: BatteryStatuses[inverterStatusBuffer[3]+inverterStatusBuffer[4]], // 2 bits
 			ACInput:       GridAvailabilities[inverterStatusBuffer[5]],
 			ACOutput:      Statuses[inverterStatusBuffer[6]],
@@ -196,7 +198,7 @@ func NewQPGSnResponse(input string) (*QPGSnResponse, error) {
 		MaxACChargingCurrentSet:      buffer[24],
 		PVInputCurrent:               buffer[25],
 		BatteryDischargeCurrent:      buffer[26],
-		Checksum:                     input[len(input)-3:],
+		Checksum:                     fmt.Sprintf("0x%x", checksum),
 	}, nil
 
 }
@@ -241,7 +243,7 @@ func HandleQPGS(inverterNum int) error {
 		actual := response[len(response)-3 : len(response)-1]
 		remainder := response[:len(response)-3]
 		wanted, _ := phocus_crc.Checksum(remainder)
-		message := fmt.Sprintf("invalid response from QPGS%d: CRC should have been %s but was %s", inverterNum, string([]byte{byte((wanted >> 8) & 0xff), byte(wanted & 0xff)}), actual)
+		message := fmt.Sprintf("invalid response from QPGS%d: CRC should have been %x but was %x", inverterNum, wanted, actual)
 		log.Println(message)
 		err = errors.New(message)
 	}

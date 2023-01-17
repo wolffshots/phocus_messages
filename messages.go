@@ -28,11 +28,11 @@ func Interpret(input Message) error {
 		errTwo := HandleQPGS(2)
 		if errTwo != nil {
 			log.Printf("Failed to handle QPGS2 :%v\n", errTwo)
-        }
+		}
 		if errOne != nil {
-            return errOne
+			return errOne
 		} else {
-            return errTwo
+			return errTwo
 		}
 	case "QID":
 		log.Println("TODO send QID")
