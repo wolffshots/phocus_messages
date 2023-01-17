@@ -85,6 +85,7 @@ type Reserved string
 type InverterStatus struct {
 	MPPT          Status
 	ACCharging    Status
+    SolarCharging Status
 	BatteryStatus BatteryStatus // 2 bits
 	ACInput       GridAvailability
 	ACOutput      Status
@@ -182,10 +183,11 @@ func NewQPGSnResponse(input string) (*QPGSnResponse, error) {
 		InverterStatus: InverterStatus{
 			MPPT:          Statuses[inverterStatusBuffer[0]],
 			ACCharging:    Statuses[inverterStatusBuffer[1]],
-			BatteryStatus: BatteryStatuses[inverterStatusBuffer[2]+inverterStatusBuffer[3]], // 2 bits
-			ACInput:       GridAvailabilities[inverterStatusBuffer[4]],
-			ACOutput:      Statuses[inverterStatusBuffer[5]],
-			Reserved:      Reserved(inverterStatusBuffer[6]),
+            SolarCharging: Statuses[inverterStatusBuffer[2]],
+			BatteryStatus: BatteryStatuses[inverterStatusBuffer[3]+inverterStatusBuffer[4]], // 2 bits
+			ACInput:       GridAvailabilities[inverterStatusBuffer[5]],
+			ACOutput:      Statuses[inverterStatusBuffer[6]],
+			Reserved:      Reserved(inverterStatusBuffer[7]),
 		},
 		ACOutputMode:                 ACOutputModes[buffer[20]],
 		BatteryChargerSourcePriority: BatteryChargerSourcePriorities[buffer[21]],
