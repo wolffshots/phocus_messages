@@ -19,21 +19,18 @@ type Message struct {
 // TODO add even more generalisation and separated implementation details here
 func Interpret(input Message) error {
 	switch input.Command {
-	case "QPGSn":
-		// TODO pass in inverter number
-		errOne := HandleQPGS(1)
-		if errOne != nil {
-			log.Printf("Failed to handle QPGS1 :%v\n", errOne)
+	case "QPGS1":
+		err := HandleQPGS(1)
+		if err != nil {
+			log.Printf("Failed to handle %s :%v\n", input.Command, err)
 		}
-		errTwo := HandleQPGS(2)
-		if errTwo != nil {
-			log.Printf("Failed to handle QPGS2 :%v\n", errTwo)
+		return err
+	case "QPGS2":
+		err := HandleQPGS(2)
+		if err != nil {
+			log.Printf("Failed to handle %s :%v\n", input.Command, err)
 		}
-		if errOne != nil {
-			return errOne
-		} else {
-			return errTwo
-		}
+		return err
 	case "QID":
 		log.Println("TODO send QID")
 	default:
