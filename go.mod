@@ -5,9 +5,9 @@ go 1.19
 require (
 	github.com/google/uuid v1.3.0
 	github.com/stretchr/testify v1.8.1
-	github.com/wolffshots/phocus_crc v0.0.0-20230426095151-f366c86994c3
-	github.com/wolffshots/phocus_mqtt v0.0.0-20230426094209-f0c6624403ec
-	github.com/wolffshots/phocus_serial v0.0.0-20230426094352-cb3cb2bd9744
+	github.com/wolffshots/phocus_crc v0.0.0-20230426105240-c3f33a1eb597
+	github.com/wolffshots/phocus_mqtt v0.0.0-20230426105149-7f39b6f21cd2
+	github.com/wolffshots/phocus_serial v0.0.0-20230426105436-e8a7e9fff872
 )
 
 require (
